@@ -1,6 +1,6 @@
 {
-  "name": "node-bits-code",
-  "version": "0.0.2",
+  "name": "node-bits-mongo",
+  "version": "0.0.1",
   "description": "Provides the logic for connecting bits to a mongo database",
   "main": "lib/index.js",
   "scripts": {
@@ -20,7 +20,6 @@
   "homepage": "https://github.com/jgretz/node-bits-mongo#readme",
   "dependencies": {
     "lodash": "^4.17.2",
-    "moment": "^2.14.1",
     "mongoose": "^4.6.0",
     "mongoose-relationship": "^0.1.5"
   },

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
-import moment from 'moment';
 
 export default class Mongo {
   constructor(config) {
