@@ -17,8 +17,7 @@ const map = {
   UUID: String,
 };
 
-const mapField = (value, key) => {
-  console.log(key, value, _.isObject(value));
+const mapField = (value) => {
   if (_.isFunction(value)) {
     return value;
   }
