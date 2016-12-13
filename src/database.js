@@ -2,6 +2,40 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
 
+// database types
+export const INTEGER = 'INTEGER';
+export const DECIMAL = 'DECIMAL';
+export const DOUBLE = 'DOUBLE';
+export const FLOAT = 'FLOAT';
+export const UUID = 'UUID';
+
+const map = {
+  INTEGER: Number,
+  DECIMAL: Number,
+  DOUBLE: Number,
+  FLOAT: Number,
+  UUID: String,
+};
+
+const mapField = (value, key) => {
+  console.log(key, value, _.isObject(value));
+  if (_.isFunction(value)) {
+    return value;
+  }
+
+  if (_.isArray(value)) {
+    return value;
+  }
+
+  if (value.type) {
+    return map[value.type] || value.type;
+  }
+
+  return undefined;
+};
+
+const mapSchema = (schema) => _.mapValues(schema, mapField);
+
 export default class Mongo {
   constructor(config) {
     mongoose.Promise = promise;
@@ -27,7 +61,10 @@ export default class Mongo {
   updateSchema(name, schema) {
     this.removeSchema(name);
 
-    this.models[name] = mongoose.model(name, schema);
+    const test = mapSchema(schema);
+    console.log(test);
+
+    this.models[name] = mongoose.model(name, test);
   }
 
   removeSchema(name) {
