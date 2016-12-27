@@ -1,5 +1,7 @@
 import Mongo from './database';
 
+export * from './util/constants';
+
 // compile
 const compileConfiguration = (options = {}, bitsConfig) => {
   return {

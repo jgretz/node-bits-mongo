@@ -2,20 +2,7 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
 
-// database types
-export const INTEGER = 'INTEGER';
-export const DECIMAL = 'DECIMAL';
-export const DOUBLE = 'DOUBLE';
-export const FLOAT = 'FLOAT';
-export const UUID = 'UUID';
-
-const map = {
-  INTEGER: Number,
-  DECIMAL: Number,
-  DOUBLE: Number,
-  FLOAT: Number,
-  UUID: String,
-};
+import { mapComplexType } from './util/map_complex_type';
 
 const mapField = (value) => {
   if (_.isFunction(value)) {
@@ -27,7 +14,7 @@ const mapField = (value) => {
   }
 
   if (value.type) {
-    return map[value.type] || value.type;
+    return mapComplexType(value);
   }
 
   return undefined;
