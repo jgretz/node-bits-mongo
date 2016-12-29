@@ -1,12 +1,10 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
+import { QUERY, INSERT, UPDATE, DELETE, BEFORE, AFTER } from 'node-bits';
 
-import {
-  mapComplexType,
-  QUERY, INSERT, UPDATE, DELETE,
-  BEFORE, AFTER,
-} from './util';
+import { mapComplexType } from './util';
+
 
 // helpers
 const mapField = (value) => {
