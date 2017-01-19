@@ -1,21 +1,4 @@
-import Mongo from './database';
+import { initialize } from 'node-bits-internal-database';
+import mongo from './database';
 
-// compile
-const compileConfiguration = (options = {}, bitsConfig) => {
-  return {
-    ...options,
-    ...bitsConfig,
-  };
-};
-
-export default (options) =>
-({
-  initializeDatabase: (bitsConfig) =>  {
-    const config = compileConfiguration(options, bitsConfig);
-    const database = new Mongo(config);
-
-    database.connect();
-
-    return database;
-  }
-});
+export default initialize(mongo);

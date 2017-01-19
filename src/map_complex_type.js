@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 // map to get the js type definition
 const map = {
   INTEGER: Number,
@@ -16,10 +14,7 @@ const map = {
 
 export const mapComplexType = (definition) => {
   const { type } = definition;
-  if (_.isFunction(type)) {
-    return type;
-  }
-
   const resolved = map[type];
-  return resolved ? resolved : undefined;
+
+  return resolved || undefined;
 };

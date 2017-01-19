@@ -1,130 +1,65 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
-import { QUERY, INSERT, UPDATE, DELETE, BEFORE, AFTER } from 'node-bits';
+import { Database } from 'node-bits-internal-database';
 
-import { mapComplexType } from './util';
+import { mapComplexType } from './map_complex_type';
 
+// set up mongoose promise
+mongoose.Promise = promise;
 
 // helpers
-const mapField = (value) => {
-  if (_.isFunction(value)) {
-    return value;
-  }
+const mapSchema = (schema) => {
+  const mapped = _.mapValues(schema, (value) => {
+    if (_.isArray(value)) {
+      return value.map(item => mapSchema(item));
+    }
 
-  if (_.isArray(value)) {
-    return value;
-  }
-
-  if (value.type) {
     return mapComplexType(value);
-  }
+  });
 
-  return undefined;
+  return _.omitBy(mapped, _.isNull);
 };
 
-const mapSchema = (schema) => _.mapValues(schema, mapField);
+// configure the mongoose specific logic
+const implementation = {
+  connect(connection) {
+    mongoose.connect(connection);
+  },
 
-// database class
-export default class Mongo {
-  constructor(config) {
-    mongoose.Promise = promise;
-
-    this.config = config;
-    this.models = [];
-  }
-
-  // connection
-  connect() {
-    mongoose.connect(this.config.connection);
-  }
-
-  // schema management
-  synchronizeSchema(schema) {
-    this.definedSchema = schema;
-
-    const keys = _.keys(schema);
-
-    _.forEach(keys, (key) => {
-      this.updateSchema(key, schema[key]);
-    });
-  }
+  afterSynchronizeSchema() {},
 
   updateSchema(name, schema) {
-    this.removeSchema(name);
-
-    const mapped = mapSchema(schema);
-    this.models[name] = mongoose.model(name, mapped);
-  }
+    return mongoose.model(name, mapSchema(schema));
+  },
 
   removeSchema(name) {
     delete mongoose.connection.models[name];
+  },
+
+  // CRUD
+  findById(model, args) {
+    return model.findById(args.id);
+  },
+
+  find (model, args) {
+    return model.find(args.query);
+  },
+
+  create(model, args) {
+    return model.create(args.data);
+  },
+
+  update(model, args) {
+    return model.findByIdAndUpdate(args.id, args.data, { new: true });
+  },
+
+  delete(model, args) {
+    return model.findByIdAndRemove(args.id);
   }
+};
 
-  model(name) {
-    return this.models[name];
-  }
-
-  // crud
-  execute(name, action, args, logic) {
-    const hooks = this.config.hooks || [];
-    const meta = { name, action, schema: this.definedSchema[name] };
-
-    // this will call the hooks with the situation, allowing it to change the args or result
-    // based on the stage
-    const callHooks = (stage, changeable) => {
-      return _.reduce(hooks, (inbound, hook) => {
-        const result = hook({ ...meta, stage, ...inbound });
-        return result ? result : inbound;
-      }, changeable);
-    };
-
-    // It goes logically :) - BEFORE hooks, call, AFTER hooks
-    return new Promise((resolve, reject) => {
-      try {
-        const resolvedArgs = callHooks(BEFORE, args);
-
-        logic(this.model(name), resolvedArgs)
-          .then((result) => {
-            const resolvedResponse = callHooks(AFTER, { result });
-
-            resolve(resolvedResponse.result);
-          })
-          .catch(reject);
-      } catch (err) {
-        console.log(err);
-        reject(err);
-      }
-    });
-  }
-
-  findById(name, id) {
-    const logic = (model, args) => model.findById(args.id);
-
-    return this.execute(name, QUERY, { id }, logic);
-  }
-
-  find(name, query) {
-    const logic = (model, args) => model.find(args.query);
-
-    return this.execute(name, QUERY, { query }, logic);
-  }
-
-  create(name, data) {
-    const logic = (model, args) => model.create(args.data);
-
-    return this.execute(name, INSERT, { data }, logic);
-  }
-
-  update(name, id, data) {
-    const logic = (model, args) => model.findByIdAndUpdate(args.id, args.data, { new: true });
-
-    return this.execute(name, UPDATE, { id, data }, logic);
-  }
-
-  delete(name, id) {
-    const logic = (model, args) => model.findByIdAndRemove(args.id);
-
-    return this.execute(name, DELETE, { id }, logic);
-  }
-}
+// export the database
+export default (config) => {
+  return new Database(config, implementation);
+};
