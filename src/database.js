@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
+import { logWarning } from 'node-bits';
 import { Database } from 'node-bits-internal-database';
 
 import { mapComplexType } from './map_complex_type';
@@ -23,10 +24,13 @@ const mapSchema = (schema) => {
 
 // configure the mongoose specific logic
 const implementation = {
-  connect(connection) {
-    mongoose.connect(connection);
+  // connection
+  connect(config) {
+    mongoose.connect(config.connection, config.mongoConfig);
   },
 
+  // schema
+  beforeSynchronizeSchema() {},
   afterSynchronizeSchema() {},
 
   updateSchema(name, schema) {
@@ -36,6 +40,15 @@ const implementation = {
   removeSchema(name) {
     delete mongoose.connection.models[name];
   },
+
+  defineRelationships(config, models, db) {
+    if (db.relationships && db.relationships.length > 0) {
+      logWarning(`Since MongoDB is a document db relationships don't really make sense.
+                  Thus node-bits-mongo ignores them`);
+    }
+  },
+
+  defineIndexes() {},
 
   // CRUD
   findById(model, args) {
