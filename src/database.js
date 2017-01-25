@@ -48,7 +48,28 @@ const implementation = {
     }
   },
 
-  defineIndexes() {},
+  defineIndexes(config, models, db) {
+    _.forEach(db.indexes, (index) => {
+      const model = models[index.model];
+      const { fields, unique = false } = index;
+
+      if (!model || !fields) {
+        logWarning(`This index has not been added due to a misconfiguration
+          ${JSON.stringify(index)}`);
+        return;
+      }
+
+      const mappedFields = fields.map(field => {
+        if (_.isString(field)){
+          return { [field]: 1 };
+        }
+
+        return { [field.field]: field.desc ? -1 : 1 };
+      });
+
+      model.index(mappedFields, { unique });
+    });
+  },
 
   // CRUD
   findById(model, args) {
