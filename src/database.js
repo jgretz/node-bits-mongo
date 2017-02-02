@@ -29,6 +29,10 @@ const implementation = {
     mongoose.connect(config.connection, config.mongoConfig);
   },
 
+  rawConnection() {
+    return mongoose;
+  },
+
   // schema
   beforeSynchronizeSchema() {},
   afterSynchronizeSchema() {},
