@@ -5,6 +5,7 @@ import { logWarning } from 'node-bits';
 import { Database } from 'node-bits-internal-database';
 
 import { mapComplexType } from './map_complex_type';
+import { runSeeds } from './run_seeds';
 
 // set up mongoose promise
 mongoose.Promise = promise;
@@ -31,7 +32,6 @@ const implementation = {
 
   // schema
   beforeSynchronizeSchema() {},
-  afterSynchronizeSchema() {},
 
   updateSchema(name, schema) {
     return mongoose.model(name, mapSchema(schema));
@@ -69,6 +69,12 @@ const implementation = {
 
       model.index(mappedFields, { unique });
     });
+  },
+
+  afterSynchronizeSchema(config, models, db) {
+    if (config.runSeeds) {
+      runSeeds(models, db);
+    }
   },
 
   // CRUD
