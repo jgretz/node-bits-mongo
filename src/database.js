@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
-import { logWarning } from 'node-bits';
-import { Database } from 'node-bits-internal-database';
+import {logWarning} from 'node-bits';
+import {Database} from 'node-bits-internal-database';
 
-import { mapComplexType } from './map_complex_type';
-import { runSeeds } from './run_seeds';
+import {mapComplexType} from './map_complex_type';
+import {runSeeds} from './run_seeds';
 
 // set up mongoose promise
 mongoose.Promise = promise;
 
 // helpers
-const mapSchema = (schema) => {
-  const mapped = _.mapValues(schema, (value) => {
+const mapSchema = schema => {
+  const mapped = _.mapValues(schema, value => {
     if (_.isArray(value)) {
       return value.map(item => mapSchema(item));
     }
@@ -53,9 +53,9 @@ const implementation = {
   },
 
   defineIndexes(config, models, db) {
-    _.forEach(db.indexes, (index) => {
+    _.forEach(db.indexes, index => {
       const model = models[index.model];
-      const { fields, unique = false } = index;
+      const {fields, unique = false} = index;
 
       if (!model || !fields) {
         logWarning(`This index has not been added due to a misconfiguration
@@ -64,14 +64,14 @@ const implementation = {
       }
 
       const mappedFields = fields.map(field => {
-        if (_.isString(field)){
-          return { [field]: 1 };
+        if (_.isString(field)) {
+          return {[field]: 1};
         }
 
-        return { [field.field]: field.desc ? -1 : 1 };
+        return {[field.field]: field.desc ? -1 : 1};
       });
 
-      model.index(mappedFields, { unique });
+      model.index(mappedFields, {unique});
     });
   },
 
@@ -86,7 +86,7 @@ const implementation = {
     return model.findById(args.id);
   },
 
-  find (model, args) {
+  find(model, args) {
     return model.find(args.query);
   },
 
@@ -95,15 +95,13 @@ const implementation = {
   },
 
   update(model, args) {
-    return model.findByIdAndUpdate(args.id, args.data, { new: true });
+    return model.findByIdAndUpdate(args.id, args.data, {new: true});
   },
 
   delete(model, args) {
     return model.findByIdAndRemove(args.id);
-  }
+  },
 };
 
 // export the database
-export default (config) => {
-  return new Database(config, implementation);
-};
+export default config => new Database(config, implementation);

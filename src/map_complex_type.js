@@ -12,9 +12,9 @@ const map = {
   BOOLEAN: Boolean,
 };
 
-export const mapComplexType = (definition) => {
-  const { type } = definition;
+export const mapComplexType = definition => {
+  const {type} = definition;
   const resolved = map[type];
 
-  return resolved || undefined;
+  return resolved || undefined; // eslint-disable-line
 };
