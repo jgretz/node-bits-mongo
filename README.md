@@ -26,10 +26,10 @@ nodeBitsMongo({
 This is the connection string to the mongo database.
 
 ### runSeeds
-If runSeeds is included and set to true, the mongo db will look for seeds as defined in the schema, and insert them into the database
+If runSeeds is included and set to true, node-bits-mongo will look for seeds as defined in the schema, and insert them into the database
 
 ### hooks
-hooks is an array of functions that accepts a single args parameter. The property values  passed to args and optional actions varys by operation and are described below:
+hooks is an array of functions that accepts a single args parameter. The property values  passed to args and optional actions varies by operation and are described below:
 
 ##### Before execution
 * name: the name of the model
