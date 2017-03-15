@@ -24,6 +24,10 @@ const mapKey = key => {
 };
 
 const mapNode = node => {
+  if (_.isArray(node)) {
+    return node.map(inner => mapNode(inner));
+  }
+
   if (_.isObject(node)) {
     return _.reduce(node, (result, value, key) => {
       const translate = literalMap[key];
@@ -34,10 +38,6 @@ const mapNode = node => {
       const mapped = {[mapKey(key)]: mapNode(value)};
       return {...result, ...mapped};
     }, {});
-  }
-
-  if (_.isArray(node)) {
-    return node.map(inner => mapNode(inner));
   }
 
   return node;
