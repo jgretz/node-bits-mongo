@@ -1,6 +1,6 @@
 {
   "name": "node-bits-mongo",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Provides the logic for connecting bits to a mongo database",
   "main": "lib/index.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "lodash": "^4.17.4",
     "mongoose": "^4.8.3",
     "node-bits": "^0.0.18",
-    "node-bits-internal-database": "^0.0.4",
+    "node-bits-internal-database": "^0.0.6",
     "promise": "^7.1.1"
   },
   "devDependencies": {

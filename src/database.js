@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import promise from 'promise';
-import {logWarning} from 'node-bits';
+import {logWarning, ASC, COUNT, START, MAX} from 'node-bits';
 import {Database} from 'node-bits-internal-database';
 
 import {mapComplexType} from './map_complex_type';
 import {runSeeds} from './run_seeds';
+import {buildWhere} from './util/where';
 
 // set up mongoose promise
 mongoose.Promise = promise;
@@ -87,7 +88,61 @@ const implementation = {
   },
 
   find(model, args) {
-    return model.find(args.query);
+    const where = buildWhere(args);
+    let query = model.find(where);
+
+    if (args.select) {
+      query = query.select(args.select.join(' '));
+    }
+
+    if (args.orderby) {
+      query = query.sort(
+        args.orderby.map(item => `${item.direction === ASC ? '' : '-'}${item.field}`).join(' ')
+      );
+    }
+
+    if (args.start) {
+      query = query.skip(args.start);
+    }
+
+    if (args.max) {
+      query = query.limit(args.max);
+    }
+
+    // helper functions for repeated code
+    const mapMeta = {
+      [COUNT]: meta => meta.count,
+      [START]: () => args.start,
+      [MAX]: () => args.max,
+    };
+
+    const wrap = (value, meta) => {
+      const result = {value};
+
+      _.forEach(args.includeMetaData, item => {
+        const map = mapMeta[item.value];
+        if (map) {
+          result[item.key] = map(meta);
+        }
+      });
+
+      return result;
+    };
+
+    // simple
+    if (!args.includeMetaData) {
+      return query;
+    }
+
+    // non-count meta data
+    const shouldCount = args.includeMetaData && _.some(args.includeMetaData, x => x.value === COUNT);
+    if (!shouldCount) {
+      return query.then(wrap);
+    }
+
+    // get the count then return
+    return model.count(where)
+    .then(count => query.then(value => wrap(value, {count})));
   },
 
   create(model, args) {
