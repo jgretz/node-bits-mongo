@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 const operatorMap = {
   ne: '$ne',
-  gt: '$ge',
+  gt: '$gt',
   ge: '$gte',
   gte: '$gte',
   lt: '$lt',

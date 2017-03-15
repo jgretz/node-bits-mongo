@@ -1,6 +1,6 @@
 {
   "name": "node-bits-mongo",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Provides the logic for connecting bits to a mongo database",
   "main": "lib/index.js",
   "scripts": {
